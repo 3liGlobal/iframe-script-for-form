@@ -13,5 +13,5 @@ document.addEventListener("DOMContentLoaded", function() {
       } else {
           console.error("IFrame element not found.");
       }
-  }, 5000);
+  }, 20 * 1000);
 });
