@@ -1,5 +1,5 @@
 (function () {
-    // Function to process email
+    // Function to handle email processing
     function processEmail() {
         var divElement = document.getElementById("swell-customer-identification");
         var email = divElement ? divElement.getAttribute("data-email") : null;
@@ -17,40 +17,36 @@
             } else {
                 console.error("IFrame element not found.");
             }
-            return true; // Successfully processed email
         } else {
             console.log("'swell-customer-identification' not found or missing email attribute.");
-            return false; // Email not found yet
         }
     }
 
-    // Immediately execute to handle elements already present
-    if (processEmail()) {
-        console.log("Email processed on initial execution.");
-        return; // If email is already processed, exit the script
+    // Function to handle page reload or URL change
+    function onPageChange() {
+        console.log("Page changed or reloaded. Running script...");
+        processEmail(); // Run your script logic
     }
 
-    // Set up MutationObserver for dynamic changes
-    var observer = new MutationObserver(function () {
-        if (processEmail()) {
-            observer.disconnect(); // Stop observing if email is processed
-        }
-    });
+    // Run on initial page load
+    onPageChange();
 
-    // Observe the entire document for changes
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-    });
+    // Listen for URL changes (single-page applications)
+    window.addEventListener("popstate", onPageChange);
 
-    // Polling fallback in case MutationObserver misses something
-    var interval = setInterval(function () {
-        if (processEmail()) {
-            clearInterval(interval); // Stop polling if email is processed
-            observer.disconnect(); // Stop observing to save resources
-        }
-    }, 500);
+    // Override `pushState` and `replaceState` to detect manual URL changes
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
 
-    console.log("Script initialized with MutationObserver and polling.");
+    history.pushState = function () {
+        originalPushState.apply(this, arguments);
+        window.dispatchEvent(new Event("popstate")); // Trigger custom event
+    };
+
+    history.replaceState = function () {
+        originalReplaceState.apply(this, arguments);
+        window.dispatchEvent(new Event("popstate")); // Trigger custom event
+    };
+
+    console.log("Script initialized to run on URL change or page reload.");
 })();
