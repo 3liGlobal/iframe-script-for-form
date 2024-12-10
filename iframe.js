@@ -17,6 +17,7 @@ function handleContentChange() {
 // Set up a MutationObserver to watch for changes in the DOM
 var observer = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutation) {
+        console.log("Mutation Record")
         handleContentChange();
     });
 });
