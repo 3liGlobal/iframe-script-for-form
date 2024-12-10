@@ -1,4 +1,8 @@
 (function () {
+    // Keep track of the last URL to detect changes
+    let lastURL = window.location.href;
+
+    // Function to process the required logic
     function processEmail() {
         const divElement = document.getElementById("swell-customer-identification");
         const email = divElement ? divElement.getAttribute("data-email") : null;
@@ -29,8 +33,13 @@
 
     // Detect changes in the URL periodically (useful for SPAs)
     setInterval(() => {
-            handlePageChange();
-    }, 100);
+        const currentURL = window.location.href;
+        if (currentURL !== lastURL) {
+            lastURL = currentURL;
+            console.log("URL changed to:", currentURL);
+            handlePageChange(); // Run logic on URL change
+        }
+    }, 100); // Check every second
 
     // Listen for popstate event (browser back/forward navigation)
     window.addEventListener("popstate", () => {
