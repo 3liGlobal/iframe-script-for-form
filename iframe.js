@@ -39,7 +39,7 @@
             console.log("URL changed to:", currentURL);
             handlePageChange(); // Run logic on URL change
         }
-    }, 1000); // Check every second
+    }, 100); // Check every second
 
     // Listen for popstate event (browser back/forward navigation)
     window.addEventListener("popstate", () => {
