@@ -1,5 +1,5 @@
 (function () {
-    // Function to handle the email retrieval and processing
+    // Function to handle email retrieval and processing
     function processEmail() {
         var divElement = document.getElementById("swell-customer-identification");
         var email = divElement ? divElement.getAttribute("data-email") : null;
@@ -17,14 +17,16 @@
             } else {
                 console.error("IFrame element not found.");
             }
+            return true; // Successfully processed email
         } else {
             console.log("'swell-customer-identification' not found or missing email attribute.");
+            return false; // No email processed
         }
     }
 
     // Set up a MutationObserver to watch for changes in the DOM
     var observer = new MutationObserver(function () {
-        processEmail(); // Call the processing function whenever the DOM changes
+        processEmail();
     });
 
     // Target the body element to observe changes across the entire document
@@ -40,8 +42,13 @@
     // Start observing the DOM
     observer.observe(targetNode, config);
 
-    // Initial call to handle the case where the element exists on page load
-    processEmail();
+    // Polling mechanism as a fallback in case MutationObserver misses changes
+    var interval = setInterval(function () {
+        if (processEmail()) {
+            clearInterval(interval); // Stop polling if the email is processed successfully
+            observer.disconnect(); // Stop observing to save resources
+        }
+    }, 500); // Poll every 500ms
 
     console.log("Dynamic script for 'swell-customer-identification' initialized.");
 })();
