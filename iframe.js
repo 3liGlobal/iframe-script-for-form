@@ -1,13 +1,16 @@
 (function () {
-    // Function to handle email processing
+    // Keep track of the last URL to detect changes
+    let lastURL = window.location.href;
+
+    // Function to process the required logic
     function processEmail() {
-        var divElement = document.getElementById("swell-customer-identification");
-        var email = divElement ? divElement.getAttribute("data-email") : null;
+        const divElement = document.getElementById("swell-customer-identification");
+        const email = divElement ? divElement.getAttribute("data-email") : null;
 
         if (email) {
-            var iframe = document.getElementById("iframe");
+            const iframe = document.getElementById("iframe");
             if (iframe) {
-                var iframeWindow = iframe.contentWindow;
+                const iframeWindow = iframe.contentWindow;
                 if (iframeWindow) {
                     iframeWindow.postMessage(email, "*");
                     console.log("Email sent to iframe:", email);
@@ -22,31 +25,45 @@
         }
     }
 
-    // Function to handle page reload or URL change
-    function onPageChange() {
-        console.log("Page changed or reloaded. Running script...");
-        processEmail(); // Run your script logic
+    // Function to handle page reloads or URL changes
+    function handlePageChange() {
+        console.log("URL or Page Reload detected. Running the script...");
+        processEmail(); // Run the logic
     }
 
-    // Run on initial page load
-    onPageChange();
+    // Detect changes in the URL periodically (useful for SPAs)
+    setInterval(() => {
+        const currentURL = window.location.href;
+        if (currentURL !== lastURL) {
+            lastURL = currentURL;
+            console.log("URL changed to:", currentURL);
+            handlePageChange(); // Run logic on URL change
+        }
+    }, 1000); // Check every second
 
-    // Listen for URL changes (single-page applications)
-    window.addEventListener("popstate", onPageChange);
+    // Listen for popstate event (browser back/forward navigation)
+    window.addEventListener("popstate", () => {
+        console.log("Popstate event detected.");
+        handlePageChange();
+    });
 
-    // Override `pushState` and `replaceState` to detect manual URL changes
+    // Override pushState and replaceState to detect programmatic URL changes
     const originalPushState = history.pushState;
     const originalReplaceState = history.replaceState;
 
     history.pushState = function () {
         originalPushState.apply(this, arguments);
-        window.dispatchEvent(new Event("popstate")); // Trigger custom event
+        console.log("PushState detected.");
+        handlePageChange();
     };
 
     history.replaceState = function () {
         originalReplaceState.apply(this, arguments);
-        window.dispatchEvent(new Event("popstate")); // Trigger custom event
+        console.log("ReplaceState detected.");
+        handlePageChange();
     };
 
-    console.log("Script initialized to run on URL change or page reload.");
+    // Initial execution on page load
+    console.log("Script initialized on:", window.location.href);
+    handlePageChange();
 })();
