@@ -1,5 +1,5 @@
 (function () {
-    // Function to handle email retrieval and processing
+    // Function to process email
     function processEmail() {
         var divElement = document.getElementById("swell-customer-identification");
         var email = divElement ? divElement.getAttribute("data-email") : null;
@@ -20,35 +20,37 @@
             return true; // Successfully processed email
         } else {
             console.log("'swell-customer-identification' not found or missing email attribute.");
-            return false; // No email processed
+            return false; // Email not found yet
         }
     }
 
-    // Set up a MutationObserver to watch for changes in the DOM
+    // Immediately execute to handle elements already present
+    if (processEmail()) {
+        console.log("Email processed on initial execution.");
+        return; // If email is already processed, exit the script
+    }
+
+    // Set up MutationObserver for dynamic changes
     var observer = new MutationObserver(function () {
-        processEmail();
+        if (processEmail()) {
+            observer.disconnect(); // Stop observing if email is processed
+        }
     });
 
-    // Target the body element to observe changes across the entire document
-    var targetNode = document.body;
+    // Observe the entire document for changes
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+    });
 
-    // Configuration for the observer
-    var config = {
-        childList: true, // Monitor addition/removal of child elements
-        subtree: true, // Monitor changes in all child nodes
-        attributes: true, // Monitor changes in attributes (useful if email is added later)
-    };
-
-    // Start observing the DOM
-    observer.observe(targetNode, config);
-
-    // Polling mechanism as a fallback in case MutationObserver misses changes
+    // Polling fallback in case MutationObserver misses something
     var interval = setInterval(function () {
         if (processEmail()) {
-            clearInterval(interval); // Stop polling if the email is processed successfully
+            clearInterval(interval); // Stop polling if email is processed
             observer.disconnect(); // Stop observing to save resources
         }
-    }, 500); // Poll every 500ms
+    }, 500);
 
-    console.log("Dynamic script for 'swell-customer-identification' initialized.");
+    console.log("Script initialized with MutationObserver and polling.");
 })();
